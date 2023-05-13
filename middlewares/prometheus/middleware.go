@@ -1,8 +1,8 @@
 package prometheus
 
 import (
+	"github.com/nothingZero/mirror"
 	"github.com/prometheus/client_golang/prometheus"
-	"mirror"
 	"strconv"
 	"time"
 )

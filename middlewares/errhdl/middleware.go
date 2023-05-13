@@ -1,6 +1,6 @@
 package errhdl
 
-import "mirror"
+import "github.com/nothingZero/mirror"
 
 type MiddlewareBuilder struct {
 	resp map[int][]byte

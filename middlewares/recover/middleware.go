@@ -1,6 +1,6 @@
 package recover
 
-import "mirror"
+import "github.com/nothingZero/mirror"
 
 type MiddlewareBuilder struct {
 	StatusCode int

@@ -2,7 +2,7 @@ package accesslog
 
 import (
 	"encoding/json"
-	"mirror"
+	"github.com/nothingZero/mirror"
 )
 
 type MiddlewareBuilder struct {

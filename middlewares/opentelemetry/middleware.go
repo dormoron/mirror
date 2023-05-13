@@ -1,14 +1,14 @@
 package opentelemetry
 
 import (
+	"github.com/nothingZero/mirror"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
-	"mirror"
 )
 
-const instrumentationName = "mirror/middleware/opentelemetry"
+const instrumentationName = "github.com/nothingZero/mirror/middleware/opentelemetry"
 
 type MiddlewareBuilder struct {
 	Tracer trace.Tracer
