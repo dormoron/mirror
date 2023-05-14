@@ -16,9 +16,21 @@ type Context struct {
 	MatchedRoute   string
 	RespData       []byte
 	RespStatusCode int
+	templateEngine TemplateEngine
 }
 
-func (c *Context) setCookie(ck *http.Cookie) {
+func (c *Context) Render(templateName string, data any) error {
+	var err error
+	c.RespData, err = c.templateEngine.Render(c.Request.Context(), templateName, data)
+	if err != nil {
+		c.RespStatusCode = http.StatusInternalServerError
+		return err
+	}
+	c.RespStatusCode = http.StatusOK
+	return nil
+}
+
+func (c *Context) SetCookie(ck *http.Cookie) {
 	http.SetCookie(c.ResponseWriter, ck)
 }
 

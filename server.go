@@ -23,9 +23,11 @@ type HTTPServer struct {
 	mils []Middleware
 
 	log func(msg string, args ...any)
+
+	templateEngine TemplateEngine
 }
 
-func InitHttpServer(opts ...HTTPServerOption) *HTTPServer {
+func InitHTTPServer(opts ...HTTPServerOption) *HTTPServer {
 	res := &HTTPServer{
 		router: initRouter(),
 		log: func(msg string, args ...any) {
@@ -36,6 +38,11 @@ func InitHttpServer(opts ...HTTPServerOption) *HTTPServer {
 		opt(res)
 	}
 	return res
+}
+func ServerWithTemplateEngine(templateEngine TemplateEngine) HTTPServerOption {
+	return func(server *HTTPServer) {
+		server.templateEngine = templateEngine
+	}
 }
 
 func ServerWithMiddleware(mils ...Middleware) HTTPServerOption {
@@ -57,6 +64,7 @@ func (h *HTTPServer) ServeHTTP(writer http.ResponseWriter, request *http.Request
 	ctx := &Context{
 		Request:        request,
 		ResponseWriter: writer,
+		templateEngine: h.templateEngine,
 	}
 	root := h.server
 	for i := len(h.mils) - 1; i >= 0; i-- {
