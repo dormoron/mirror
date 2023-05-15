@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 type FileUploader struct {
@@ -62,7 +63,12 @@ func (f *FileDownloader) Handle() HandleFunc {
 		}
 		req.val = filepath.Clean(req.val)
 		dst := filepath.Join(f.Dir, req.val)
-
+		dst, req.err = filepath.Abs(dst)
+		if !strings.Contains(dst, f.Dir) {
+			ctx.RespStatusCode = http.StatusBadRequest
+			ctx.RespData = []byte("Access path error")
+			return
+		}
 		fn := filepath.Base(dst)
 		header := ctx.ResponseWriter.Header()
 		header.Set("Content-Disposition", "attachment;filename="+fn)
