@@ -17,6 +17,8 @@ type Context struct {
 	RespData       []byte
 	RespStatusCode int
 	templateEngine TemplateEngine
+
+	UserValues map[string]any
 }
 
 func (c *Context) Render(templateName string, data any) error {
