@@ -8,18 +8,27 @@ import (
 
 type HandleFunc func(ctx *Context)
 
+// 确保 HTTPServer 肯定实现了 Server 接口
 var _ Server = &HTTPServer{}
 
 type Server interface {
 	http.Handler
+	// Start 启动服务器
+	// addr 是监听地址
 	Start(addr string) error
-	registerRoute(method string, path string, handleFunc HandleFunc, ms ...Middleware)
+	// registerRoute 注册一个路由
+	// method 是 HTTP 方法
+	// path 是路由路径
+	// handleFunc 是方法
+	// mils 是中间件
+	registerRoute(method string, path string, handleFunc HandleFunc, mils ...Middleware)
 }
 
 type HTTPServerOption func(server *HTTPServer)
 
 type HTTPServer struct {
 	router
+
 	mils []Middleware
 
 	log func(msg string, args ...any)
@@ -63,7 +72,7 @@ func (s *HTTPServer) UseRoute(method string, path string, mils ...Middleware) {
 	s.registerRoute(method, path, nil, mils...)
 }
 
-// 处理请求入口
+// ServeHTTP HTTPServer 处理请求的入口
 func (h *HTTPServer) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	ctx := &Context{
 		Request:        request,
@@ -109,6 +118,7 @@ func (h *HTTPServer) server(ctx *Context) {
 	info.n.handler(ctx)
 }
 
+// Start 启动服务器，编程接口
 func (h *HTTPServer) Start(addr string) error {
 	l, err := net.Listen("tcp", addr)
 	if err != nil {

@@ -12,10 +12,13 @@ import (
 )
 
 type FileUploader struct {
-	FileField   string
+	// FileField 对应于文件在表单中的字段名字
+	FileField string
+	// FileField 对应于文件在表单中的字段名字
 	DstPathFunc func(*multipart.FileHeader) string
 }
 
+// Handle 文件上传
 func (f *FileUploader) Handle() HandleFunc {
 	return func(ctx *Context) {
 		file, fileHeader, err := ctx.Request.FormFile(f.FileField)
@@ -53,6 +56,7 @@ type FileDownloader struct {
 	Dir string
 }
 
+// Handle 文件下载
 func (f *FileDownloader) Handle() HandleFunc {
 	return func(ctx *Context) {
 		req := ctx.QueryValue("file")

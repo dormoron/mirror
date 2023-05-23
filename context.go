@@ -8,6 +8,12 @@ import (
 	"strconv"
 )
 
+var (
+	errKeyNotFound = errors.New("web: key 不存在")
+	errBodyIsNil   = errors.New("web: body 为 nil")
+	errInputNotNil = errors.New("web: 输入不能为 nil")
+)
+
 type Context struct {
 	Request        *http.Request
 	ResponseWriter http.ResponseWriter
@@ -55,10 +61,10 @@ func (c *Context) RespJSON(status int, val any) error {
 
 func (c *Context) BindJSON(val any) error {
 	if val == nil {
-		return errors.New("web: 输入不能为 nil")
+		return errInputNotNil
 	}
 	if c.Request.Body == nil {
-		return errors.New("web: body 为 nil")
+		return errBodyIsNil
 	}
 	decoder := json.NewDecoder(c.Request.Body)
 	return decoder.Decode(val)
@@ -66,10 +72,10 @@ func (c *Context) BindJSON(val any) error {
 
 func (c *Context) BindJSONOpt(val any, useNumber bool, disableUnknown bool) error {
 	if val == nil {
-		return errors.New("web: 输入不能为 nil")
+		return errInputNotNil
 	}
 	if c.Request.Body == nil {
-		return errors.New("web: body 为 nil")
+		return errBodyIsNil
 	}
 	decoder := json.NewDecoder(c.Request.Body)
 	if useNumber {
@@ -101,7 +107,7 @@ func (c *Context) QueryValue(key string) StringValue {
 	if !ok {
 		return StringValue{
 			val: "",
-			err: errors.New("web: key 不存在"),
+			err: errKeyNotFound,
 		}
 	}
 	return StringValue{val: vals[0]}
@@ -112,7 +118,7 @@ func (c *Context) PathValue(key string) StringValue {
 	if !ok {
 		return StringValue{
 			val: "",
-			err: errors.New("web: key 不存在"),
+			err: errKeyNotFound,
 		}
 	}
 	return StringValue{val: val}
