@@ -8,7 +8,6 @@ import (
 
 type router struct {
 	// trees 是按照 HTTP 方法来组织的
-	// 如 GET => *node
 	trees map[string]*node
 }
 
@@ -64,7 +63,6 @@ func (r *router) registerRoute(method string, path string, handler HandleFunc, m
 }
 
 // findRoute 查找对应的节点
-// 注意，返回的 node 内部 HandleFunc 不为 nil 才算是注册了路由
 func (r *router) findRoute(method string, path string) (*matchInfo, bool) {
 	root, ok := r.trees[method]
 	if !ok {
@@ -111,12 +109,6 @@ const (
 )
 
 // node 代表路由树的节点
-// 路由树的匹配顺序是：
-// 1. 静态完全匹配
-// 2. 正则匹配，形式 :param_name(reg_expr)
-// 3. 路径参数匹配：形式 :param_name
-// 4. 通配符匹配：*
-// 这是不回溯匹配
 type node struct {
 	typ nodeType
 
@@ -214,11 +206,8 @@ func (n *node) childOfNonStatic(path string) (*node, bool) {
 }
 
 // childOrCreate 查找子节点，
-// 首先会判断 path 是不是通配符路径
-// 其次判断 path 是不是参数路径，即以 : 开头的路径
-// 最后会从 children 里面查找，
-// 如果没有找到，那么会创建一个新的节点，并且保存在 node 里面
 func (n *node) childOrCreate(path string) *node {
+	// 判断 path 是不是通配符路径
 	if path == "*" {
 		if n.paramChild != nil {
 			panic(fmt.Sprintf("web: 非法路由，已有路径参数路由。不允许同时注册通配符路由和参数路由 [%s]", path))
@@ -232,7 +221,7 @@ func (n *node) childOrCreate(path string) *node {
 		return n.starChild
 	}
 
-	// 以 : 开头，需要进一步解析，判断是参数路由还是正则路由
+	// 判断 path 是不是参数路径，即以 : 开头的路径，需要进一步解析，判断是参数路由还是正则路由
 	if path[0] == ':' {
 		paramName, expr, isReg := n.parseParam(path)
 		if isReg {
@@ -244,8 +233,10 @@ func (n *node) childOrCreate(path string) *node {
 	if n.children == nil {
 		n.children = make(map[string]*node)
 	}
+	// 从 children 里面查找
 	child, ok := n.children[path]
 	if !ok {
+		// 如果没有找到，创建一个新的节点，并且保存在 node 里面
 		child = &node{path: path, typ: nodeTypeStatic}
 		n.children[path] = child
 	}

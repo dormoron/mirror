@@ -59,6 +59,10 @@ func (s *HTTPServer) Use(mils ...Middleware) {
 	s.mils = append(s.mils, mils...)
 }
 
+func (s *HTTPServer) UseRoute(method string, path string, mils ...Middleware) {
+	s.registerRoute(method, path, nil, mils...)
+}
+
 // 处理请求入口
 func (h *HTTPServer) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	ctx := &Context{
@@ -113,38 +117,38 @@ func (h *HTTPServer) Start(addr string) error {
 	return http.Serve(l, h)
 }
 
-func (h *HTTPServer) Get(path string, handleFunc HandleFunc, mils ...Middleware) {
-	h.registerRoute(http.MethodGet, path, handleFunc, mils...)
+func (h *HTTPServer) Get(path string, handleFunc HandleFunc) {
+	h.registerRoute(http.MethodGet, path, handleFunc)
 }
 
-func (h *HTTPServer) Head(path string, handleFunc HandleFunc, mils ...Middleware) {
-	h.registerRoute(http.MethodHead, path, handleFunc, mils...)
+func (h *HTTPServer) Head(path string, handleFunc HandleFunc) {
+	h.registerRoute(http.MethodHead, path, handleFunc)
 }
 
-func (h *HTTPServer) Post(path string, handleFunc HandleFunc, mils ...Middleware) {
-	h.registerRoute(http.MethodPost, path, handleFunc, mils...)
+func (h *HTTPServer) Post(path string, handleFunc HandleFunc) {
+	h.registerRoute(http.MethodPost, path, handleFunc)
 }
 
-func (h *HTTPServer) Put(path string, handleFunc HandleFunc, mils ...Middleware) {
-	h.registerRoute(http.MethodPut, path, handleFunc, mils...)
+func (h *HTTPServer) Put(path string, handleFunc HandleFunc) {
+	h.registerRoute(http.MethodPut, path, handleFunc)
 }
 
-func (h *HTTPServer) Patch(path string, handleFunc HandleFunc, mils ...Middleware) {
-	h.registerRoute(http.MethodPatch, path, handleFunc, mils...)
+func (h *HTTPServer) Patch(path string, handleFunc HandleFunc) {
+	h.registerRoute(http.MethodPatch, path, handleFunc)
 }
 
-func (h *HTTPServer) Delete(path string, handleFunc HandleFunc, mils ...Middleware) {
-	h.registerRoute(http.MethodDelete, path, handleFunc, mils...)
+func (h *HTTPServer) Delete(path string, handleFunc HandleFunc) {
+	h.registerRoute(http.MethodDelete, path, handleFunc)
 }
 
-func (h *HTTPServer) Connect(path string, handleFunc HandleFunc, mils ...Middleware) {
-	h.registerRoute(http.MethodConnect, path, handleFunc, mils...)
+func (h *HTTPServer) Connect(path string, handleFunc HandleFunc) {
+	h.registerRoute(http.MethodConnect, path, handleFunc)
 }
 
-func (h *HTTPServer) Options(path string, handleFunc HandleFunc, mils ...Middleware) {
-	h.registerRoute(http.MethodOptions, path, handleFunc, mils...)
+func (h *HTTPServer) Options(path string, handleFunc HandleFunc) {
+	h.registerRoute(http.MethodOptions, path, handleFunc)
 }
 
-func (h *HTTPServer) Trace(path string, handleFunc HandleFunc, mils ...Middleware) {
-	h.registerRoute(http.MethodTrace, path, handleFunc, mils...)
+func (h *HTTPServer) Trace(path string, handleFunc HandleFunc) {
+	h.registerRoute(http.MethodTrace, path, handleFunc)
 }
