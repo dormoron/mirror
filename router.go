@@ -2,6 +2,7 @@ package mirror
 
 import (
 	"fmt"
+	"github.com/nothingZero/mirror/internal/errs"
 	"regexp"
 	"strings"
 )
@@ -221,10 +222,10 @@ func (n *node) childOfNonStatic(path string) (*node, bool) {
 func (n *node) childOrCreate(path string) *node {
 	if path == "*" {
 		if n.paramChild != nil {
-			panic(fmt.Sprintf("web: 非法路由，已有路径参数路由。不允许同时注册通配符路由和参数路由 [%s]", path))
+			panic(errs.ErrPathNotAllowWildcardAndPath(path))
 		}
 		if n.regChild != nil {
-			panic(fmt.Sprintf("web: 非法路由，已有正则路由。不允许同时注册通配符路由和正则路由 [%s]", path))
+			panic(errs.ErrRegularNotAllowWildcardAndRegular(path))
 		}
 		if n.starChild == nil {
 			n.starChild = &node{path: path, typ: nodeTypeAny}
@@ -254,14 +255,14 @@ func (n *node) childOrCreate(path string) *node {
 
 func (n *node) childOrCreateParam(path string, paramName string) *node {
 	if n.regChild != nil {
-		panic(fmt.Sprintf("web: 非法路由，已有正则路由。不允许同时注册正则路由和参数路由 [%s]", path))
+		panic(errs.ErrRegularNotAllowRegularAndPath(path))
 	}
 	if n.starChild != nil {
-		panic(fmt.Sprintf("web: 非法路由，已有通配符路由。不允许同时注册通配符路由和参数路由 [%s]", path))
+		panic(errs.ErrWildcardNotAllowWildcardAndPath(path))
 	}
 	if n.paramChild != nil {
 		if n.paramChild.path != path {
-			panic(fmt.Sprintf("web: 路由冲突，参数路由冲突，已有 %s，新注册 %s", n.paramChild.path, path))
+			panic(errs.ErrPathClash(n.paramChild.path, path))
 		}
 	} else {
 		n.paramChild = &node{path: path, paramName: paramName, typ: nodeTypeParam}
@@ -271,19 +272,19 @@ func (n *node) childOrCreateParam(path string, paramName string) *node {
 
 func (n *node) childOrCreateReg(path string, expr string, paramName string) *node {
 	if n.starChild != nil {
-		panic(fmt.Sprintf("web: 非法路由，已有通配符路由。不允许同时注册通配符路由和正则路由 [%s]", path))
+		panic(errs.ErrWildcardNotAllowWildcardAndRegular(path))
 	}
 	if n.paramChild != nil {
-		panic(fmt.Sprintf("web: 非法路由，已有路径参数路由。不允许同时注册正则路由和参数路由 [%s]", path))
+		panic(errs.ErrPathNotAllowPathAndRegular(path))
 	}
 	if n.regChild != nil {
 		if n.regChild.regExpr.String() != expr || n.paramName != paramName {
-			panic(fmt.Sprintf("web: 路由冲突，正则路由冲突，已有 %s，新注册 %s", n.regChild.path, path))
+			panic(errs.ErrRegularClash(n.regChild.path, path))
 		}
 	} else {
 		regExpr, err := regexp.Compile(expr)
 		if err != nil {
-			panic(fmt.Errorf("web: 正则表达式错误 %w", err))
+			panic(errs.ErrRegularExpression(err))
 		}
 		n.regChild = &node{path: path, paramName: paramName, regExpr: regExpr, typ: nodeTypeReg}
 	}

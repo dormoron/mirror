@@ -2,17 +2,11 @@ package memory
 
 import (
 	"context"
-	"errors"
-	"fmt"
+	"github.com/nothingZero/mirror/internal/errs"
 	"github.com/nothingZero/mirror/session"
 	"github.com/patrickmn/go-cache"
 	"sync"
 	"time"
-)
-
-var (
-	errorKeyNotFound     = errors.New("session: 找不到 key")
-	errorSessionNotFound = errors.New("session: 找不到 session")
 )
 
 type Store struct {
@@ -44,7 +38,7 @@ func (s *Store) Refresh(ctx context.Context, id string) error {
 	defer s.mutex.Unlock()
 	val, ok := s.sessions.Get(id)
 	if !ok {
-		return errors.New("session: 该 id 对应的 session 不存在")
+		return errs.ErrIdSessionNotFound()
 	}
 	s.sessions.Set(id, val, s.expiration)
 	return nil
@@ -62,7 +56,7 @@ func (s *Store) Get(ctx context.Context, id string) (session.Session, error) {
 	defer s.mutex.Unlock()
 	sess, ok := s.sessions.Get(id)
 	if !ok {
-		return nil, errorSessionNotFound
+		return nil, errs.ErrSessionNotFound()
 	}
 	return sess.(*Session), nil
 }
@@ -75,7 +69,7 @@ type Session struct {
 func (s *Session) Get(ctx context.Context, key string) (any, error) {
 	val, ok := s.values.Load(key)
 	if !ok {
-		return nil, fmt.Errorf("%w, key %s", errorKeyNotFound, key)
+		return nil, errs.ErrKeyNotFound(key)
 	}
 	return val, nil
 }

@@ -2,15 +2,11 @@ package redis
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v9"
+	"github.com/nothingZero/mirror/internal/errs"
 	"github.com/nothingZero/mirror/session"
 	"time"
-)
-
-var (
-	errSessionNotFound = errors.New("session: id 对应的 session 不存在")
 )
 
 type Store struct {
@@ -69,7 +65,7 @@ func (s *Store) Refresh(ctx context.Context, id string) error {
 		return err
 	}
 	if !ok {
-		return errSessionNotFound
+		return errs.ErrIdSessionNotFound()
 	}
 	return nil
 }
@@ -91,7 +87,7 @@ func (s *Store) Get(ctx context.Context, id string) (session.Session, error) {
 		return nil, err
 	}
 	if cnt != 1 {
-		return nil, errSessionNotFound
+		return nil, errs.ErrIdSessionNotFound()
 	}
 	return &Session{
 		id:     id,
@@ -128,7 +124,7 @@ end
 		return err
 	}
 	if res < 0 {
-		return errSessionNotFound
+		return errs.ErrIdSessionNotFound()
 	}
 	return nil
 }
